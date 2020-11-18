@@ -1,0 +1,98 @@
+---
+title: "Midpoint Deliverable Report"
+author: "Xinyu Wang, Shaosui Hong, Crystal Wen, Yufei Zhang"
+date: "5/24/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, warning = F, message = F)
+source("./scripts/prepare.R")
+covid_19_ds_ori <- read.csv("./data/covid-19-healthy-diet/Food_Supply_Quantity_kg_Data.csv")
+country_prof <- read.csv("./data/country-profiles/country_profile_variables.csv")
+covid_19 <- prepare(covid_19_ds_ori, country_prof)
+```
+
+## The purpose/importance of the project
+
+- We are interested in the domain of **Health**, and subdomain of **Nutrition**, because we are in a situation where we are required to stay home. During the coronavirus epidemic, maintaining a healthy and strong body became the priority and it should always be. Therefore, adopting a healthy diet is more necessary than ever. Moreover, as restaurants are only taking to-go orders, more and more people have decided to cook for themselves, acknowledging the nutrients for each food item would be helpful.
+- Due to our current situation with Covid-19, we are interested in how nutrition impacts us. In this project, we will be analyzing the nutritional value of different food products. Furthermore, we will also analyze how nutrition may impact a countries recovery rate based on the dataset of covid-19 condition and information.
+
+## Summary Information
+
+```{r summary_info}
+source("./scripts/summary_info.R")
+summary <- get_summary_info(covid_19)
+```
+
+The Covid-19 diet study included a total of `r summary$length` different features. The highest death proportion was `r summary$highest_death`, and the country that had this death rate was `r summary$highest_death_country`. On the other hand, the lowest death proportion was `r summary$lowest_death`, and the countries that had this death rate were `r summary$lowest_death_country`. Furthermore, this dataset included the proportion of the population that was undernourished. The highest proportion was `r summary$highest_undernourished` for the countries of `r summary$highest_un_country`. What's more, the undernourished rate of countries like `r summary$lowest_un_country` are under `r summary$lowest_undernourished`. 
+
+## Aggregate Table
+
+### Explaining why the particular grouping calculation was performed
+
+- In this aggregate table, we want to find out how the diet structure correlate to the recovery from covid-19. Therefore, we explored the proportion of protein and vitamine take in and the obesity rate for those recovered people from different region. This can provide people information about how they should adjust their diet to prevent or recover from covid-19.
+
+```{r agg_table}
+source("./scripts/aggregate_table.R")
+agg_table <- aggregate_table(covid_19)
+data.frame(
+  Region = pull(agg_table, Region),
+  Recovery = pull(agg_table, recovered_rate),
+  Protein = pull(agg_table, protein_rate),
+  Obesity = pull(agg_table, obesity_rate),
+  Fruit_and_Veges = pull(agg_table, fruit_and_veges)
+) %>%
+  kable()
+```
+
+### Interprets information in the table
+
+- For regions with higher recovered rate, they tend to have higher protein rate as well, indicating protein might help people maintain healthy and recover from disease. However,  the recovered rate doesn't have obvious correlation with fat and vitamine that people take in.
+
+## Charts
+
+### Chart 1 (Undernourished Rate by Country)
+
+#### Description of what the chart attempts to answer/understand
+
+- This chart shows the undernourished rate of each country on a map to demostrate the distribution of it. 
+
+```{r chart1}
+source("./scripts/chart1.R")
+chart_1(covid_19, country_shape)
+```
+
+#### Interprets information from the chart, honing in on important information
+
+- In this chart, the level of undernourished rate of each country is super clear. At the same time, it also shows that high undernourished rate country are always next to each other.
+
+### Chart 2 (Death Rate by Region)
+
+####  Description of what the chart attempts to answer/understand
+
+- This chart shows the confirmed case of covid-19 of each region(continent). From the above chart one, we find that the undernourished rate varies from Continent to Continent. In this chart, we are trying to demonstrate the proportion of confirmed case in differnt Continents. So, a pie chart should be the most effective way. 
+
+```{r chart2}
+source("./scripts/chart2.R")
+chart_2(covid_19)
+```
+
+#### Interprets information from the chart, honing in on important information
+
+- Here in the chart we can easily find the largest proportion is North America which takes up almost one third of the total cases. 
+
+### Chart 3 (% of Obesity Vs % of COVID Confirmed Cases)
+
+#### Description of what the chart attempts to answer/understand
+
+- In chart 3, we are trying to find the correlation between obesity and the chance of COVID-19 infection. Therefore, the best way to indicate the relation between the two is by visualizing a column chart. Since our dataset contains data from a total of 170 countries, I grouped the dataset by Region to make the visualization much more concise.Besides, I also mutated two new columns which are percentage of COVID confirmed cases and percentage of  Obesity out of Region population. Moreover, I included the chart of Obesity V.S.  Confirmed to find out whether there is any correlation between the two. Based on Obesity V.S.  Confirmed chart. 
+
+```{r chart3}
+source("./scripts/chart3.R")
+chart_3(covid_19)
+```
+
+#### Interprets information from the chart, honing in on important information
+
+- I found out that NorthernAmerica has both the highest % of obesity and % of COVID confirmed cases. However, the region that has the second highest % of COVID confirmed cases is SouthernEurope, but SouthernEurope does **not** have the second highest % of Obesity, which shows that there is **no obvious correlation** between obesity and the chance of COVID-19 infection. But the chart also indicates that the Regions that have the lower % of COVID confirmed cases also have a very low % of obesity, such as EasternAsia, MiddleAfrica, SouthernAsia, EasternAfrica, and WesternAfrica.
